@@ -53,19 +53,25 @@ func snippetWildcard(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(msg))
 }
 
+// Add a snippetCreatePost handler function.
+func snippetCreatePost(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Save a new snippet..."))
+}
+
 func main() {
 	// Use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", home) // Restrict this route to exact matches on / only.
+	mux.HandleFunc("GET /{$}", home) // Restrict this route to exact matches on / only.
 
 	// Register the two new handler functions and corresponding route patterns with
 	// the servemux, in exactly the same way that we did before.
-	mux.HandleFunc("/snippet/view/{id}", snippetView)
-	mux.HandleFunc("/snippet/wildcard/{wildcard...}", snippetWildcard)
-	mux.HandleFunc("/snippet/create", snippetCreate)
-	mux.HandleFunc("/snippet/test1/", snippetTest1)
-	mux.HandleFunc("/snippet/test1/test2", snippetTest2)
+	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
+	mux.HandleFunc("GET /snippet/wildcard/{wildcard...}", snippetWildcard)
+	mux.HandleFunc("GET /snippet/create", snippetCreate)
+	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
+	mux.HandleFunc("GET /snippet/test1/", snippetTest1)
+	mux.HandleFunc("GET /snippet/test1/test2", snippetTest2)
 
 	// Print a log message to say that the server is starting.
 	log.Print("starting server on :4000")
