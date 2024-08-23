@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -27,6 +28,12 @@ func main() {
 	mux := http.NewServeMux()
 
 	var cfg config
+
+	// Use the slog.New() function to initialize a new structured logger, which
+	// writes to the standard out stream and uses the default settings.
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+	}))
 
 	// Define a new command-line flag with the name 'addr', a default value of ":4000"
 	// and some short help text explaining what the flag controls. The value of the
@@ -56,8 +63,12 @@ func main() {
 	mux.HandleFunc("GET /snippet/create", snippetCreate)
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
 
-	log.Printf("starting server on %s", cfg.addr)
+	logger.Info("starting server", slog.String("addr", cfg.addr))
 
 	err := http.ListenAndServe(cfg.addr, mux)
-	log.Fatal(err)
+	// And we also use the Error() method to log any error message returned by
+	// http.ListenAndServe() at Error severity (with no additional attributes),
+	// and then call os.Exit(1) to terminate the application with exit code 1.
+	logger.Error(err.Error())
+	os.Exit(1)
 }
