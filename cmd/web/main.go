@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -22,8 +23,9 @@ import (
 // web application. For now we'll only include the structured logger, but we'll
 // add more to this as the build progresses.
 type application struct {
-	logger   *slog.Logger
-	snippets *models.SnippetModel
+	logger        *slog.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 type config struct {
@@ -97,13 +99,21 @@ func main() {
 	// before the main() function exits.
 	defer db.Close()
 
+	// Initialize a new template cache...
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	// Initialize a new instance of our application struct, containing the
 	// dependencies (for now, just the structured logger).
 	// Initialize a models.SnippetModel instance containing the connection pool
 	// and add it to the application dependencies.
 	app := &application{
-		logger:   logger,
-		snippets: &models.SnippetModel{DB: db},
+		logger:        logger,
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
 	}
 
 	logger.Info("starting server", slog.String("addr", cfg.addr))
