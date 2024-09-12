@@ -2,8 +2,9 @@ package main
 
 import "net/http"
 
-// The routes() method returns a servemux containing our application routes.
-func (app *application) routes() *http.ServeMux {
+// Update the signature for the routes() method so that it returns a
+// http.Handler instead of *http.ServeMux.
+func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	// Create a file server which serves files out of the "./ui/static" directory.
@@ -21,5 +22,5 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
 	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
 
-	return mux
+	return commonHeaders(mux)
 }
